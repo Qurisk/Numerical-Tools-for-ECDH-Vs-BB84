@@ -1,15 +1,10 @@
 import numpy as np
-
 import matplotlib.pyplot as plt
-
 from math import comb
-
 from scipy.stats import binom
-
 from scipy.optimize import brentq
 
 ech = np.logspace(-5, np.log10(0.5), 500)
-
 
 
 #BB84 Section
