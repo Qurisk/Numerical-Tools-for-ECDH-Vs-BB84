@@ -11,9 +11,11 @@ eta = eta_ch*eta_det
 pd = 10**(-7)               #dark count probability [0;1]
 
 
+
 N=10**(6)                   #Number of emitted signal
 p_B = 0.5                   #probability to choose on basis
 p_BS = p_B**2 + (1-p_B)**2
+
 
 nps=int(round(N*p_BS*(eta+(1-eta)*pd)))    #Expected number of click
 print (nps)
