@@ -144,8 +144,8 @@ except ValueError:
 
 # #custom point - output : ech
 
-def equation_solve_ech(d_target, ech_target, St, npk):
-    return Rkp_QKD(d_target, ech_target)-Rkp_ECDH(St, npk, ech_target)
+def equation_solve_ech(ech_target, d_target, St, npk):
+    return Rkp_QKD(ech_target, d_target)-Rkp_ECDH(St, npk, ech_target)
 
 d_target = 18
 
@@ -153,7 +153,7 @@ ech_min = 10**(-6)
 ech_max = 10**(-1)
 
 try:
-    ech_solution = brentq(equation_solve_ech, ech_min, ech_max, args=(ech_target, St_target, npk_target))
+    ech_solution = brentq(equation_solve_ech, ech_min, ech_max, args=(d_target, St_target, npk_target))
     print ("Maximum ech = ", ech_solution)
 
 except ValueError:
