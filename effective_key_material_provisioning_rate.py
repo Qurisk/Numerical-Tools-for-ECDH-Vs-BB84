@@ -10,7 +10,6 @@ ech = np.logspace(-5, np.log10(0.5), 500)
 #BB84 Section
 
 eta_det = 0.75              #detector efficiency [0;1]
-
 pd = 10**(-7)               #dark count probability [0;1]
 
 d1 = 15                     #communication distance [Km]
@@ -51,7 +50,6 @@ QBER3 = (eta3*ech+0.5*(1-eta3)*pd)/(eta3+(1-eta3)*pd)
 
 QBER4 = (eta4*ech+0.5*(1-eta4)*pd)/(eta4+(1-eta4)*pd)
 # plt.plot(ech,QBER4, label='QBER4')
-
 
 
 r_QBER1 = np.maximum(0, 1-2*(-QBER1*np.log2(QBER1)-(1-QBER1)*np.log2(1-QBER1)))
@@ -129,25 +127,15 @@ def equation(d, ech_target, St, npk):
     return Rkp_QKD(ech_target, d)-Rkp_ECDH(St, npk, ech_target)
 
 
-f_min = equation(0, ech_target, St_target, npk_target)
-f_max = equation(500, ech_target, St_target, npk_target)
+d_min = 0
+d_max = 500
 
+try:
+    d_solution = brentq(equation, d_min, d_max, args=(ech_target, St_target, npk_target))
+    print ("Maximum distance = ", d_solution, "km" )
 
-if f_min == 0:
-    d_solution = 0
-    print("Maximum distance =", d_solution, "km")
-
-
-elif f_min*f_max < 0:
-    d_solution = brentq(equation, 0, 500, args=(ech_target, St_target, npk_target))
-    print("Maximum distance =", d_solution, "km")
-
-
-else:
-    print("No intersection found between 0 and 500 km.")
-    print("Equation at 0 km =", f_min)
-    print("Equation at 500 km =", f_max)
-
+except ValueError:
+    print("No intersection found")
 
 
 plt.xscale('log')
