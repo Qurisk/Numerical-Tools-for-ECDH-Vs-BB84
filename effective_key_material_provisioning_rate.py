@@ -142,7 +142,7 @@ except ValueError:
     print("No intersection found")
 
 
-# #custom point - output : ech
+# custom point - output : ech
 
 def equation_solve_ech(ech_target, d_target, St, npk):
     return Rkp_QKD(ech_target, d_target)-Rkp_ECDH(St, npk, ech_target)
