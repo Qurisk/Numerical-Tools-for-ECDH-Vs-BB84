@@ -94,7 +94,7 @@ plt.plot(ech, Rkp4, label=r'$\mathcal{R}_{KM}^{BB84}$' + f'({d4} km)')
 
 
 
-#custom point
+#custom point parameters
 
 pB_target = 0.5                                         #probability to select one basis
 pBS_target = pB_target**2 + (1-pB_target)**2            #probability for successful basis match, 0.5 if unbiased
@@ -102,11 +102,14 @@ eta_det_target = 0.70                                   #detector efficiency
 pd_target = 10**(-7)                                    #dark count probability
 alpha_target = 0.2                                      #loss coefficient
 
-ech_target = 5*10**(-2)
 
 St_target = 128                                         #security strength - table
 npk_target = 520                                        #length of public key - table
 
+
+#custom point - output : distance
+
+ech_target = 5*10**(-2)
 
 def H(x):
     return -x*np.log2(x) - (1-x)*np.log2(1-x)
@@ -114,25 +117,44 @@ def H(x):
 def Rkp_ECDH(St, npk, ech_target):
     return (St/(2*npk))*(1-H(ech_target))
 
-def eta_ch(d):
-    return 10**(-(alpha_target*d)/10)
+def eta_ch(d_target):
+    return 10**(-(alpha_target*d_target)/10)
 
-def Q(ech_target, d):
-    return (eta_det_target*eta_ch(d)*ech_target + (1-eta_det_target*eta_ch(d))*0.5*pd_target)/(eta_det_target*eta_ch(d) + (1-eta_det_target*eta_ch(d))*pd_target)
+def Q(ech_target, d_target):
+    return (eta_det_target*eta_ch(d_target)*ech_target + (1-eta_det_target*eta_ch(d_target))*0.5*pd_target)/(eta_det_target*eta_ch(d_target) + (1-eta_det_target*eta_ch(d_target))*pd_target)
 
-def Rkp_QKD(ech_target, d):
-    return (pBS_target * (eta_det_target*eta_ch(d) + (1-eta_det_target*eta_ch(d))*pd_target) * np.maximum(0, 1-2*H(Q(ech_target, d))))
+def Rkp_QKD(ech_target, d_target):
+    return (pBS_target * (eta_det_target*eta_ch(d_target) + (1-eta_det_target*eta_ch(d_target))*pd_target) * np.maximum(0, 1-2*H(Q(ech_target, d_target))))
 
-def equation(d, ech_target, St, npk):
-    return Rkp_QKD(ech_target, d)-Rkp_ECDH(St, npk, ech_target)
 
+
+def equation_solve_d(d_target, ech_target, St, npk):
+    return Rkp_QKD(ech_target, d_target)-Rkp_ECDH(St, npk, ech_target)
 
 d_min = 0
 d_max = 500
 
 try:
-    d_solution = brentq(equation, d_min, d_max, args=(ech_target, St_target, npk_target))
+    d_solution = brentq(equation_solve_d, d_min, d_max, args=(ech_target, St_target, npk_target))
     print ("Maximum distance = ", d_solution, "km" )
+
+except ValueError:
+    print("No intersection found")
+
+
+# #custom point - output : ech
+
+def equation_solve_ech(d_target, ech_target, St, npk):
+    return Rkp_QKD(d_target, ech_target)-Rkp_ECDH(St, npk, ech_target)
+
+d_target = 18
+
+ech_min = 10**(-6)
+ech_max = 10**(-1)
+
+try:
+    ech_solution = brentq(equation_solve_ech, ech_min, ech_max, args=(ech_target, St_target, npk_target))
+    print ("Maximum ech = ", ech_solution)
 
 except ValueError:
     print("No intersection found")
