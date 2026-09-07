@@ -10,7 +10,7 @@ Reproduces the two figures and the break-even values reported in the paper.
 ECDH and BB84 quantum key distribution both
 establish shared key material; they are usually compared solely on the basis of their security guarantees. But another interesting factor to compare is how they degrade differently as a *communication channel* gets noisier.
 
-This repo provides numerical tools that make the comparison concrete on a single shared channel model, parameterised by the channel error rate `eps_ch`, along two axes:
+This repo provides numerical tools that make the comparison concrete through a shared channel-error coordinate `eps_ch`, along two axes:
 
 1. **Reliability:** ECDH must deliver a public key intact; a single flipped bit invalidates the exchange, so the failure probability grows with the key length `npk` unless a forward error-correcting code absorbs the errors. BB84 instead aborts when the observed QBER exceeds its security threshold. Figure 1 puts both failure modes on the same axis, for the NIST prime curves P-256/384/521, uncoded and under two codes.
 
@@ -18,8 +18,8 @@ This repo provides numerical tools that make the comparison concrete on a single
    `R_KP` of the two schemes: for ECDH, the security strength delivered per
    transported public-key bit, scaled by the channel capacity; for BB84, the
    asymptotic secret-key fraction scaled by the sifted detection yield, over a
-   range of fibre lengths. Their crossing marks the regime where one scheme
-   provisions key material faster than the other.
+   range of fibre lengths. Their crossing identifies where the two provisioning
+   indices are equal under the adopted normalization.
 
 
 ## Requirements
