@@ -50,12 +50,11 @@ FIG1_N_SIGNAL = 10 ** 6                 # number of emitted signals
 FIG1_QBER_TH  = 0.11                    # BB84 abort threshold
 
 # Curves drawn. Comment out an entry to drop it from the figure.
-FIG1_SHOW_QBER    = True                            # QBER reference curve
+FIG1_SHOW_QBER    = False                            # QBER reference curve
 FIG1_SHOW_BB84    = True                            # BB84 abort probability
 FIG1_UNCODED      = ["P-256", "P-384", "P-521"]     # ECDH without coding
 FIG1_CODED        = [                               # ECDH with coding
     ("P-256", "C1"),
-    ("P-521", "C1"),
     ("P-256", "C2"),
 ]
 
