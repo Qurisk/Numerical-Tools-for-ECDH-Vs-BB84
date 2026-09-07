@@ -12,7 +12,7 @@ establish shared key material; they are usually compared solely on the basis of 
 
 This repo provides numerical tools that make the comparison concrete through a shared channel-error coordinate `eps_ch`, along two axes:
 
-1. **Reliability:** ECDH must deliver a public key intact; a single flipped bit invalidates the exchange, so the failure probability grows with the key length `npk` unless a forward error-correcting code absorbs the errors. BB84 instead aborts when the observed QBER exceeds its security threshold. Figure 1 puts both failure modes on the same axis, for the NIST prime curves P-256/384/521, uncoded and under two codes.
+1. **Reliability:** ECDH must deliver a public key intact; a single flipped bit invalidates the exchange, so the failure probability grows with the key length `npk` unless a forward error-correcting code absorbs the errors. BB84 instead aborts when the observed QBER exceeds its security threshold. Figure 1 compares P-256, P-384, and P-521 without coding, together with two BCH-coded P-256 operating points.
 
 2. **Key-Provisioning Behaviour:** Figure 2 compares the effective key-provisioning index
    `R_KP` of the two schemes: for ECDH, the security strength delivered per
