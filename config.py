@@ -68,11 +68,10 @@ FIG2_CURVES      = ["P-256"]                # ECDH curves drawn
 FIG2_DISTANCES_KM = [15, 20, 25, 30]        # BB84 links drawn
 
 # =============================================================================
-# Custom operating point (Figure 2 script)
+# Solver operating point
 #
-# A scratch scenario for the break-even solver: it contributes no curve to the
-# figure. It tracks the physical parameters above except where a line below
-# deliberately overrides one.
+# Used by solver.py. It is independent of Figure 2 and tracks the
+# physical parameters above except where a CUSTOM value deliberately overrides one.
 # =============================================================================
 
 ETA_DET_CUSTOM = 0.70       # deliberately more conservative than ETA_DET
@@ -89,6 +88,7 @@ D_BRACKET_KM = (0, 500)     # search bracket for brentq
 # Solved for channel error rate at this distance:
 D_TARGET_KM  = 18
 ECH_BRACKET  = (1e-6, 1e-1)
+SOLVER_PLOT_POINTS = 500
 
 # =============================================================================
 # Output
@@ -103,6 +103,7 @@ FIGURE_DIR = "figures"
 # x label.
 # =============================================================================
 
-XLABEL      = r"Unified channel-error parameter $\varepsilon_{ch}$"
-FIG1_YLABEL = r"Protocol-level failure probability"
-FIG2_YLABEL = r"Key-provisioning index $\mathcal{R}_{\mathrm{KP}}$"
+XLABEL          = r"Unified channel-error parameter $\varepsilon_{ch}$"
+FIG1_YLABEL     = r"Protocol-level failure probability"
+FIG2_YLABEL     = r"Key-provisioning index $\mathcal{R}_{\mathrm{KP}}$"
+DISTANCE_XLABEL = r"Fibre distance $d$ [km]"
