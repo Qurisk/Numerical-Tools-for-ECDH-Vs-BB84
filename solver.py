@@ -1,8 +1,8 @@
 
 """Solvers for the ECDH vs. BB84 key-provisioning index.
 
-Scenario 1: fix eps_ch and solve the maximum BB84 fibre distance.
-Scenario 2: fix the BB84 fibre distance and solve the maximum eps_ch.
+Scenario 1: fix eps_ch and solve the BB84/ECDH break-even fibre distance.
+Scenario 2: fix the BB84 fibre distance and solve the break-even eps_ch.
 
 Parameters live in config.py; provisioning formulas live in model.py.
 """
@@ -15,7 +15,7 @@ import config as cfg
 import model
 
 
-# --- custom operating point ---------------------------------------------------
+# --- solver operating point ---------------------------------------------------
 
 p_bs_custom = model.basis_match(cfg.P_B_CUSTOM)
 strength_custom, npk_custom = cfg.CURVES[cfg.SOLVER_CURVE]
@@ -40,11 +40,10 @@ def solve_distance():
     if gap_min * gap_max > 0:
 
         if gap_min < 0:
-            print ("Distance solver: BB84 is already below ECDH")
+            print("Distance solver: BB84 is below ECDH at both ends of D_BRACKET_KM, so no sign change is bracketed. Inspect or adjust the bracket.")
 
         else:
-            print (
-                "Distance solver: BB84 remains above ECDH over, extend the bracket")
+            print("Distance solver: BB84 is above ECDH at both ends of D_BRACKET_KM, so no sign change is bracketed. Inspect or adjust the bracket.")
 
         return None
 
@@ -59,19 +58,15 @@ def solve_distance():
     )
 
     if gap_min > 0:
-
         print(
-            f"For eps_ch = {cfg.ECH_TARGET:g}, "
-            f"BB84 has the larger R_KP for "
-            f"d < {d_solution:.6f} km."
+            "At the lower end of D_BRACKET_KM, BB84 has the larger R_KP. "
+            f"The break-even point is d = {d_solution:.6f} km."
         )
 
     else:
-
         print(
-            f"For eps_ch = {cfg.ECH_TARGET:g}, "
-            "the ordering is reversed at the lower end "
-            "of the bracket."
+            "At the lower end of D_BRACKET_KM, ECDH has the larger R_KP. "
+            f"The break-even point is d = {d_solution:.6f} km."
         )
 
     return d_solution
@@ -89,14 +84,16 @@ def solve_error_rate():
 
         if gap_min < 0:
             print(
-                "Error-rate solver: BB84 is below ECDH at both "
-                "ends of ECH_BRACKET; no root is bracketed."
+                "Error-rate solver: BB84 is below ECDH at both ends of "
+                "ECH_BRACKET, so no sign change is bracketed. "
+                "Inspect or adjust the bracket."
             )
 
         else:
             print(
-                "Error-rate solver: BB84 is above ECDH at both "
-                "ends of ECH_BRACKET; extend the bracket."
+                "Error-rate solver: BB84 is above ECDH at both ends of "
+                "ECH_BRACKET, so no sign change is bracketed. "
+                "Inspect or adjust the bracket."
             )
 
         return None
@@ -112,19 +109,15 @@ def solve_error_rate():
     )
 
     if gap_min > 0:
-
         print(
-            f"At d = {cfg.D_TARGET_KM:g} km, "
-            f"BB84 has the larger R_KP for "
-            f"eps_ch < {ech_solution:.8f}."
+            "At the lower end of ECH_BRACKET, BB84 has the larger R_KP. "
+            f"The break-even point is eps_ch = {ech_solution:.8f}."
         )
 
     else:
-
         print(
-            f"At d = {cfg.D_TARGET_KM:g} km, "
-            "the ordering is reversed at the lower end "
-            "of the bracket."
+            "At the lower end of ECH_BRACKET, ECDH has the larger R_KP. "
+            f"The break-even point is eps_ch = {ech_solution:.8f}."
         )
 
     return ech_solution

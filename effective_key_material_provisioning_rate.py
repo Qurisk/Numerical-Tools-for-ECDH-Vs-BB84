@@ -1,8 +1,7 @@
 """Figure 2: effective key-provisioning index vs. the channel error rate.
 
 Compares the BB84 index over several fibre lengths against the ECDH rate for the
-NIST prime curves, then solves for the break-even point of a custom operating
-point (see the custom-point section of config.py).
+selected NIST prime curves.
 
 Parameters live in config.py, formulas in model.py.
 """

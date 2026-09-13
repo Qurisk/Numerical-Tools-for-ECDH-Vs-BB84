@@ -41,8 +41,13 @@ def qber(eps_ch, eta, pd):
 # --- key-provisioning index ----------------------------------------
 
 def binary_entropy(x):
-    """Binary Shannon entropy H2(x), in bits."""
-    return -x * np.log2(x) - (1 - x) * np.log2(1 - x)
+    """Binary Shannon entropy H2(x), in bits, with H2(0)=H2(1)=0."""
+    x = np.asarray(x, dtype=float)
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        h = -x * np.log2(x) - (1 - x) * np.log2(1 - x)
+
+    return np.where((x == 0) | (x == 1), 0.0, h)
 
 
 def secret_fraction(q):

@@ -1,7 +1,7 @@
-"""User-editable parameters for both figure scripts.
+"""User-editable parameters for the numerical tools.
 
-Everything a reader may want to change lives here; model.py holds the formulas
-and the two figure scripts only assemble and plot. Edit this file, not those.
+Everything a reader may want to change lives here; model.py holds the formulas,
+and the numerical scripts assemble, solve, and plot. Edit this file, not those.
 """
 
 import numpy as np
@@ -87,7 +87,7 @@ D_BRACKET_KM = (0, 500)     # search bracket for brentq
 
 # Solved for channel error rate at this distance:
 D_TARGET_KM  = 18
-ECH_BRACKET  = (1e-6, 1e-1)
+ECH_BRACKET  = (1e-6, 1e-1) # search bracket for brentq
 SOLVER_PLOT_POINTS = 500
 
 # =============================================================================

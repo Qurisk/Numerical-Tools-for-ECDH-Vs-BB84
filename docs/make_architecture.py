@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 
 EDGE, FILL, ACCENT = "#3c4550", "#eef1f5", "#dbe4f0"
-MONO = {"family": "monospace", "fontsize": 10.5, "color": "#1b1f24"}
-SUB = {"fontsize": 8.8, "color": "#48515c"}
+MONO = {"family": "monospace", "fontsize": 10.0, "color": "#1b1f24"}
+SUB = {"fontsize": 8.4, "color": "#48515c"}
 
 
 def box(ax, x, y, w, h, title, subtitle, fill=FILL):
@@ -25,33 +25,153 @@ def arrow(ax, x0, y0, x1, y1):
                                 shrinkA=0, shrinkB=0))
 
 
-fig, ax = plt.subplots(figsize=(10.5, 5.0))
-ax.set_xlim(0, 10.5); ax.set_ylim(0.6, 5.45); ax.axis("off")
+fig, ax = plt.subplots(figsize=(13.5, 5.2))
+ax.set_xlim(0, 13.5)
+ax.set_ylim(0.55, 5.55)
+ax.axis("off")
 
-LEFT, RIGHT, BUS = 2.75, 7.75, 3.95
+CONFIG_X = 3.4
+MODEL_X = 10.1
+BUS = 4.0
 
-box(ax, LEFT, 4.85, 4.3, 0.95, "config.py", "configuration file for users  (start here)", ACCENT)
-box(ax, RIGHT, 4.85, 4.3, 0.95, "model.py", "provides functions for formulae")
+SCRIPT_X = (2.2, 6.75, 11.3)
 
-# shared bus: both scripts import both modules
-for x in (LEFT, RIGHT):
-    ax.plot([x, x], [4.375, BUS], color=EDGE, linewidth=1.1)
-ax.plot([LEFT, RIGHT], [BUS, BUS], color=EDGE, linewidth=1.1)
-for x in (LEFT, RIGHT):
-    ax.plot([x], [BUS], marker="o", markersize=4.5, color=EDGE)  # junction: both scripts use both modules
-    arrow(ax, x, BUS, x, 3.28)
+box(
+    ax,
+    CONFIG_X,
+    4.9,
+    5.1,
+    0.95,
+    "config.py",
+    "user-editable parameters  (start here)",
+    ACCENT
+)
 
-box(ax, LEFT, 2.8, 4.6, 0.95, "ECDHvsQKD_perf_chan.py", "Figure 1 of Section 5")
-box(ax, RIGHT, 2.8, 4.9, 0.95, "effective_key_material_provisioning_rate.py", "Figure 2 of Section 5")
+box(
+    ax,
+    MODEL_X,
+    4.9,
+    5.1,
+    0.95,
+    "model.py",
+    "closed-form analytical model"
+)
 
-for x in (LEFT, RIGHT):
-    arrow(ax, x, 2.325, x, 1.68)
+# Shared bus: all numerical scripts use config.py and model.py.
+for x in (CONFIG_X, MODEL_X):
+    ax.plot(
+        [x, x],
+        [4.425, BUS],
+        color=EDGE,
+        linewidth=1.1
+    )
 
-box(ax, LEFT, 1.2, 4.6, 0.95, "figures/failure_probability.pdf", "expected sifted detections")
-box(ax, RIGHT, 1.2, 4.9, 0.95, "figures/provisioning_rate.pdf",
-    "break-even distance and error rate")
+ax.plot(
+    [SCRIPT_X[0], SCRIPT_X[-1]],
+    [BUS, BUS],
+    color=EDGE,
+    linewidth=1.1
+)
+
+for x in SCRIPT_X:
+    ax.plot(
+        [x],
+        [BUS],
+        marker="o",
+        markersize=4.5,
+        color=EDGE
+    )
+
+    arrow(
+        ax,
+        x,
+        BUS,
+        x,
+        3.33
+    )
+
+box(
+    ax,
+    SCRIPT_X[0],
+    2.82,
+    4.1,
+    0.95,
+    "ECDHvsQKD_perf_chan.py",
+    "Figure 1 of Section 5"
+)
+
+box(
+    ax,
+    SCRIPT_X[1],
+    2.82,
+    4.4,
+    0.95,
+    "effective_key_material_provisioning_rate.py",
+    "Figure 2 of Section 5"
+)
+
+box(
+    ax,
+    SCRIPT_X[2],
+    2.82,
+    3.3,
+    0.95,
+    "solver.py",
+    "R_KP break-even solvers"
+)
+
+for x in SCRIPT_X:
+    arrow(
+        ax,
+        x,
+        2.345,
+        x,
+        1.70
+    )
+
+box(
+    ax,
+    SCRIPT_X[0],
+    1.18,
+    4.1,
+    0.95,
+    "figures/failure_probability.pdf",
+    "protocol-level failure figure"
+)
+
+box(
+    ax,
+    SCRIPT_X[1],
+    1.18,
+    4.4,
+    0.95,
+    "figures/provisioning_rate.pdf",
+    "key-provisioning figure"
+)
+
+box(
+    ax,
+    SCRIPT_X[2],
+    1.18,
+    3.6,
+    0.95,
+    "figures/break_even_*.pdf",
+    "plots intersections; prints d* and eps_ch*"
+)
 
 fig.tight_layout(pad=0.3)
-fig.savefig("docs/architecture.png", dpi=200, facecolor="white")
-fig.savefig("docs/architecture.pdf", facecolor="white")
-print("wrote docs/architecture.png and docs/architecture.pdf")
+
+fig.savefig(
+    "docs/architecture.png",
+    dpi=200,
+    facecolor="white"
+)
+
+fig.savefig(
+    "docs/architecture.pdf",
+    facecolor="white"
+)
+
+print(
+    "wrote docs/architecture.png and docs/architecture.pdf"
+)

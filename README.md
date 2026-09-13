@@ -2,7 +2,7 @@
 
 Numerical companion to our paper **A Unified Channel-Error Framework for Comparative Performance and Security Analysis
 of Classical and Quantum Key Establishment**.
-Reproduces the two figures and the break-even values reported in the paper.
+Reproduces the two figures reported in the paper and provides break-even solvers for the key-provisioning comparison.
 
 
 ## Motivation
@@ -38,16 +38,18 @@ figures (NumPy 2.5.3, SciPy 1.18.1, Matplotlib 3.11.1 on Python 3.14.4).
 ## Usage
 
 ```bash
-.venv/bin/python ECDHvsQKD_perf_chan.py                     # Figure 1 of section 5
+.venv/bin/python ECDHvsQKD_perf_chan.py                       # Figure 1 of section 5
 .venv/bin/python effective_key_material_provisioning_rate.py  # Figure 2 of section 5
+.venv/bin/python solver.py                                    # break-even solvers
 ```
 
-Each script opens the figure and writes a vector copy to `figures/`:
+Each numerical script writes its vector output(s) to `figures/`:
 
-| Script | Figure written | Also printed |
+| Script | Figure(s) written | Also printed |
 | --- | --- | --- |
 | `ECDHvsQKD_perf_chan.py` | `figures/failure_probability.pdf` | expected number of sifted detections |
-| `effective_key_material_provisioning_rate.py` | `figures/provisioning_rate.pdf` | break-even distance and break-even channel error rate |
+| `effective_key_material_provisioning_rate.py` | `figures/provisioning_rate.pdf` | — |
+| `solver.py` | `figures/break_even_distance.pdf`, `figures/break_even_channel_error.pdf` | break-even distance and break-even channel-error coordinate |
 
 `figures/` is regenerated on every run and is not tracked by git; drop the
 entry from `.gitignore` to version the output alongside the source.
@@ -57,20 +59,19 @@ entry from `.gitignore` to version the output alongside the source.
 
 ![Repository architecture](docs/architecture.png)
 
-*Both scripts import both modules; neither contains a formula or a constant.*
+*All numerical scripts use the shared configuration and model modules; the analytical formulas remain centralized in `model.py`.*
 
 | File | Role |
 | --- | --- |
-| `config.py` | **Every adjustable quantity.** Physical parameters, the curve and code tables, the sweep grids, which curves each figure draws, and the custom operating point. Start here. |
-| `model.py` | The closed-form model: one function per formula, no state, no plotting. Imported by both scripts. |
-| `ECDHvsQKD_perf_chan.py` | Figure 1: failure probability vs. channel error rate. |
-| `effective_key_material_provisioning_rate.py` | Figure 2: provisioning rate vs. channel error rate, plus the break-even solver. |
+| `config.py` | **Every adjustable quantity.** Physical parameters, curve and code tables, sweep grids, figure selections, and break-even solver inputs. Start here. |
+| `model.py` | Closed-form model: one function per analytical expression, no configuration and no plotting. |
+| `ECDHvsQKD_perf_chan.py` | Figure 1: protocol-level failure probability vs. channel-error coordinate. |
+| `effective_key_material_provisioning_rate.py` | Figure 2: key-provisioning index vs. channel-error coordinate. |
+| `solver.py` | Solves the RKP break-even condition either for fibre distance at fixed `eps_ch` or for `eps_ch` at fixed distance, and plots both intersections. |
 | `requirements.txt` | Pinned dependency versions. |
-| `docs/` | Architecture diagram above, and `make_architecture.py` that regenerates it. |
+| `docs/` | Repository architecture diagram and its generation script. |
 
-The two scripts contain no formulas and no constants: they select entries from
-`config.py`, call `model.py`, and plot. Any change to the published figures is
-therefore a change to `config.py` alone.
+The numerical scripts do not duplicate the analytical model: they select parameters from `config.py`, call the functions in `model.py`, and assemble the requested figures or break-even calculation. Changes to operating parameters, curve selections, or solver brackets belong in `config.py`; changes to the analytical model belong in `model.py`.
 
 
 ## Configuring a run
@@ -86,12 +87,70 @@ All edits happen in `config.py`, which is divided into commented sections.
 - **Curve selection**: `FIG1_UNCODED`, `FIG1_CODED`, `FIG2_CURVES`,
   `FIG2_DISTANCES_KM` list what each figure draws. Removing an entry drops the
   curve; no plotting code needs editing.
-- **Custom operating point**: inputs to the break-even solver. This section
-  is a scratch scenario and contributes no curve to Figure 2. It inherits the
-  physical parameters above except where a line explicitly overrides one; at
-  present only `ETA_DET_CUSTOM` (0.70) departs from the figure parameters
-  (0.75). The two printed break-even values therefore describe a slightly more
-  conservative detector than the plotted curves.
+- **Break-even solver operating point**:
+  `SOLVER_CURVE` selects the ECDH reference curve.
+  `ETA_DET_CUSTOM`, `PD_CUSTOM`, `P_B_CUSTOM`, and `ALPHA_CUSTOM`
+  define the BB84 operating point used by both solver modes.
+  With the current defaults, only `ETA_DET_CUSTOM = 0.70` differs from
+  the parameters used for the published Figure 2.
+- **Distance solver**:
+  `ECH_TARGET` fixes the channel-error coordinate and
+  `D_BRACKET_KM` defines the distance interval searched by Brent's method.
+- **Channel-error solver**:
+  `D_TARGET_KM` fixes the fibre distance and
+  `ECH_BRACKET` defines the channel-error interval searched by Brent's method.
+- **Solver plotting**:
+  `SOLVER_PLOT_POINTS` controls only the smoothness of the two solver figures;
+  it does not control the numerical accuracy of Brent's root finder.
+
+The Brent intervals are numerical search brackets, not physical limits of the model. A root is guaranteed to be bracketed when the RKP difference changes sign between the two endpoints. If both endpoints have the same sign, the solver reports that no sign change is bracketed; this statement alone does not prove that no root exists elsewhere or that no multiple crossings exist inside an arbitrary interval. Inspect or adjust the bracket when this occurs.
+
+## Break-even solver
+
+The solver uses the difference
+
+`g(eps_ch, d) = R_KP^BB84(eps_ch, d) - R_KP^ECDH(eps_ch)`,
+
+so a root of `g` is exactly the break-even condition
+
+`R_KP^BB84 = R_KP^ECDH`.
+
+The two solver modes answer different link-planning questions.
+
+### 1. Known channel-error level: solve for fibre distance
+
+If a channel-error coordinate `eps_ch` can be guaranteed, the distance solver
+keeps `eps_ch` fixed and solves
+
+`R_KP^BB84(eps_ch, d*) = R_KP^ECDH(eps_ch)`.
+
+The resulting `d*` is the distance at which the two provisioning indices are equal. Under the adopted model and when BB84 has the larger index on the lower-distance side of the crossing, `d*` acts as the maximum fibre distance for which that ordering is retained.
+
+This mode is useful when several candidate BB84 links are evaluated under the same assumed channel-error level. Rather than entering every link distance individually, the user can solve once for `d*` and compare each candidate distance against the resulting boundary.
+
+The generated figure `figures/break_even_distance.pdf` plots both provisioning indices against fibre distance and marks the numerical intersection.
+
+### 2. Known fibre distance: solve for channel-error level
+
+If the fibre distance is already known, the channel-error solver keeps that distance fixed and solves
+
+`R_KP^BB84(eps_ch*, d) = R_KP^ECDH(eps_ch*)`.
+
+The resulting `eps_ch*` is the channel-error coordinate at which the two provisioning indices are equal. When BB84 has the larger index on the lower-error side of the crossing, `eps_ch*` is the maximum admissible channel-error level for retaining that ordering under the selected model parameters.
+
+This mode is useful for a specific BB84 link whose physical length is fixed:
+instead of manually sweeping candidate error levels, the solver returns the break-even channel-error target directly.
+
+The generated figure `figures/break_even_channel_error.pdf` plots both provisioning indices against `eps_ch` and marks the numerical intersection.
+
+
+
+With the default solver configuration (`ETA_DET_CUSTOM = 0.70`, `SOLVER_CURVE = "P-256"`), the current examples give approximately
+
+- `d* = 11.553583 km` for `eps_ch = 0.05`;
+- `eps_ch* = 0.02389293` for `d = 18 km`.
+
+These values belong to the custom solver operating point and should not be confused with the approximately 25 km low-error crossover discussed for the different parameter set used in Figure 2 of the paper.
 
 
 ## Model
